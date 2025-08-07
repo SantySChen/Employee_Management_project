@@ -1,7 +1,19 @@
 import { Request, Response } from "express";
-import { OnboardingModel } from "../models/onboardingModel"; // Adjust path
+import { OnboardingModel } from "../models/onboardingModel";
+
+function tryParse(input: any) {
+  if (typeof input !== "string") return input;
+  try {
+    return JSON.parse(input);
+  } catch (e) {
+    console.error("Failed to parse:", input);
+    return undefined;
+  }
+}
 
 export const create = async (req: Request, res: Response) => {
+  console.log("req.files:", req.files);
+  console.log("req.body:", req.body);
   try {
     const {
       userId,
@@ -24,9 +36,16 @@ export const create = async (req: Request, res: Response) => {
       [fieldname: string]: Express.Multer.File[];
     };
 
-    const profilePic = files?.profilePic?.[0]?.path || undefined;
-    const driverLicense = files?.driverLicense?.[0]?.path || undefined;
-    const workAuth = files?.workAuth?.[0]?.path || undefined;
+    const optReceipt = files?.optReceipt?.[0].path;
+    const profilePic = files?.profilePic?.[0].path;
+    const driverLicense = files?.driverLicense?.[0].path;
+    const workAuth = files?.workAuth?.[0].path;
+
+    console.log("Parsed address:", tryParse(address));
+    console.log("Parsed contact:", tryParse(contact));
+    console.log("Parsed usResidentStatus:", tryParse(usResidentStatus));
+    console.log("Parsed reference:", tryParse(reference));
+    console.log("Parsed emergencyContacts:", tryParse(emergencyContacts));
 
     const onboarding = new OnboardingModel({
       userId,
@@ -39,15 +58,13 @@ export const create = async (req: Request, res: Response) => {
       dob,
       gender,
       profilePic,
-      address: address ? JSON.parse(address) : undefined,
-      contact: contact ? JSON.parse(contact) : undefined,
+      address: tryParse(address),
+      contact: tryParse(contact),
       usResidentStatus: usResidentStatus
-        ? JSON.parse(usResidentStatus)
+        ? { ...tryParse(usResidentStatus), optReceipt }
         : undefined,
-      reference: reference ? JSON.parse(reference) : undefined,
-      emergencyContacts: emergencyContacts
-        ? JSON.parse(emergencyContacts)
-        : undefined,
+      reference: tryParse(reference),
+      emergencyContacts: tryParse(emergencyContacts),
       documents: {
         driverLicense,
         workAuth,
@@ -58,7 +75,10 @@ export const create = async (req: Request, res: Response) => {
     const saved = await onboarding.save();
     res.status(201).json(saved);
   } catch (error) {
-    console.error("Create onboarding error:", error);
+    console.error(
+      "Create onboarding error:",
+      error instanceof Error ? error.stack : error
+    );
     res.status(500).json({ message: "Failed to create onboarding record." });
   }
 };
@@ -109,16 +129,22 @@ export const updateOnboardingByUserId = async (req: Request, res: Response) => {
       reference,
       emergencyContacts,
       feedback,
-      status,
     } = req.body;
 
     const files = req.files as {
       [fieldname: string]: Express.Multer.File[];
     };
 
+    const optReceipt = files?.optReceipt?.[0]?.path;
     const profilePic = files?.profilePic?.[0]?.path;
     const driverLicense = files?.driverLicense?.[0]?.path;
     const workAuth = files?.workAuth?.[0]?.path;
+
+    console.log("Parsed address:", tryParse(address));
+    console.log("Parsed contact:", tryParse(contact));
+    console.log("Parsed usResidentStatus:", tryParse(usResidentStatus));
+    console.log("Parsed reference:", tryParse(reference));
+    console.log("Parsed emergencyContacts:", tryParse(emergencyContacts));
 
     if (firstName) existing.firstName = firstName;
     if (lastName) existing.lastName = lastName;
@@ -129,17 +155,22 @@ export const updateOnboardingByUserId = async (req: Request, res: Response) => {
     if (dob) existing.dob = dob;
     if (gender) existing.gender = gender;
     if (feedback) existing.feedback = feedback;
-    if (status) existing.status = status as "Pending" | "Approved" | "Rejected";
-
-    if (address) existing.address = JSON.parse(address);
-    if (contact) existing.contact = JSON.parse(contact);
-    if (usResidentStatus)
-      existing.usResidentStatus = JSON.parse(usResidentStatus);
-    if (reference) existing.reference = JSON.parse(reference);
-    if (emergencyContacts)
-      existing.emergencyContacts = JSON.parse(emergencyContacts);
 
     if (profilePic) existing.profilePic = profilePic;
+
+    if (address) existing.address = tryParse(address);
+    if (contact) existing.contact = tryParse(contact);
+
+    if (usResidentStatus) {
+      const parsedStatus = tryParse(usResidentStatus);
+      if (optReceipt) parsedStatus.optReceipt = optReceipt;
+      existing.usResidentStatus = parsedStatus;
+    }
+
+    if (reference) existing.reference = tryParse(reference);
+    if (emergencyContacts)
+      existing.emergencyContacts = tryParse(emergencyContacts);
+
     if (driverLicense || workAuth) {
       existing.documents = {
         ...existing.documents,
@@ -148,10 +179,17 @@ export const updateOnboardingByUserId = async (req: Request, res: Response) => {
       };
     }
 
+    if (existing.status === "Rejected") {
+      existing.status = "Pending";
+    }
+
     const updated = await existing.save();
     res.json(updated);
   } catch (error) {
-    console.error("Update onboarding error:", error);
+    console.error(
+      "Update onboarding error:",
+      error instanceof Error ? error.stack : error
+    );
     res.status(500).json({ message: "Failed to update onboarding." });
   }
 };

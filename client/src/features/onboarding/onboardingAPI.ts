@@ -10,7 +10,9 @@ export const create = async (formData: FormData): Promise<Onboarding> => {
   return response.data;
 };
 
-export const getOnboardingByUserId = async (userId: string): Promise<Onboarding> => {
+export const getOnboardingByUserId = async (
+  userId: string
+): Promise<Onboarding> => {
   const response = await axios.get(`/onboarding/${userId}`);
   return response.data;
 };
@@ -26,3 +28,5 @@ export const updateOnboardingByUserId = async (
   });
   return response.data;
 };
+
+

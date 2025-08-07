@@ -11,20 +11,26 @@ import {
 interface Props {
   profilePicUrl: string;
   setProfilePicUrl: (url: string) => void;
+  setProfilePicFile: (file: File) => void;
   driverLicenseUrl: string;
   setDriverLicenseUrl: (url: string) => void;
+  setDriverLicenseFile: (file: File) => void;
   workAuthUrl: string;
   setWorkAuthUrl: (url: string) => void;
+  setWorkAuthFile: (file: File) => void;
   readonly?: boolean;
 }
 
 const Panel8: React.FC<Props> = ({
   profilePicUrl,
   setProfilePicUrl,
+  setProfilePicFile,
   driverLicenseUrl,
   setDriverLicenseUrl,
+  setDriverLicenseFile,
   workAuthUrl,
   setWorkAuthUrl,
+  setWorkAuthFile,
   readonly = false,
 }) => {
   const profilePicRef = useRef<HTMLInputElement>(null);
@@ -41,12 +47,15 @@ const Panel8: React.FC<Props> = ({
       switch (type) {
         case "profilePic":
           setProfilePicUrl(previewURL);
+          setProfilePicFile(file);
           break;
         case "driverLicense":
           setDriverLicenseUrl(previewURL);
+          setDriverLicenseFile(file);
           break;
         case "workAuth":
           setWorkAuthUrl(previewURL);
+          setWorkAuthFile(file);
           break;
         default:
           break;
@@ -68,22 +77,39 @@ const Panel8: React.FC<Props> = ({
         {url ? (
           <>
             <Button
-              component="a"
-              href={url}
-              target="_blank"
-              download
               variant="soft"
+              onClick={async () => {
+                try {
+                  const response = await fetch(url);
+                  const blob = await response.blob();
+                  const blobUrl = window.URL.createObjectURL(blob);
+
+                  const a = document.createElement("a");
+                  a.href = blobUrl;
+                  a.download = url.split("/").pop() || "download";
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+
+                  window.URL.revokeObjectURL(blobUrl);
+                } catch (error) {
+                  console.error("Download failed", error);
+                }
+              }}
             >
               Download
             </Button>
             <Button
-            component="a"
-            href={url}
-            target="_blank"
-            variant="plain"
-          >
-            Preview
-          </Button>
+              component="a"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="plain"
+            >
+              {url.includes("blob:") && !url.endsWith(".pdf")
+                ? "View Image"
+                : "Preview"}
+            </Button>
             {!readonly && (
               <>
                 <Button onClick={() => ref.current?.click()}>Change</Button>
@@ -114,7 +140,7 @@ const Panel8: React.FC<Props> = ({
           </Typography>
         )}
       </Stack>
-      {showImage && url && (
+      {showImage && url && url.startsWith("blob:") && (
         <img
           src={url}
           alt={label}

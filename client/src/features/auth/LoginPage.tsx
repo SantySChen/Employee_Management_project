@@ -10,18 +10,45 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/joy";
+import { useNavigate } from "react-router-dom";
+import { fetchOnboarding } from "../onboarding/onboardingSlice";
 
 const LoginPage: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const { loading, error } = useAppSelector((state) => state.auth);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(login({ username, password }));
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    const response = await dispatch(login({ username, password })).unwrap();
+    const user = response.user;
+
+    if (user.role === "EMPLOYEE") {
+      try {
+        const onboarding = await dispatch(fetchOnboarding(user._id!)).unwrap();
+
+        if (onboarding.status === "Approved") {
+          navigate("/employee/personal");
+        } else {
+          navigate("/onboard");
+        }
+      } catch (err) {
+        console.warn("Onboarding not found. Redirecting to onboarding page.", err);
+        navigate("/onboard");
+      }
+    } else if (user.role === "HR") {
+      navigate("/hr");
+    }
+  } catch (err) {
+    console.error("Login failed:", err);
+  }
+};
 
   return (
     <main>

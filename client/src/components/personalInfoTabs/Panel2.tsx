@@ -12,6 +12,7 @@ interface Props {
   setCity: (val: string) => void;
   setState: (val: string) => void;
   setZip: (val: string) => void;
+  readonly: boolean;
 }
 
 const Panel2: React.FC<Props> = ({
@@ -25,6 +26,7 @@ const Panel2: React.FC<Props> = ({
   setCity,
   setState,
   setZip,
+  readonly
 }) => {
   return (
     <TabPanel value={2}>
@@ -35,6 +37,7 @@ const Panel2: React.FC<Props> = ({
           type="text"
           value={building}
           onChange={(e) => setBuilding(e.target.value)}
+          disabled={readonly}
         />
       </FormControl>
       <FormControl required>
@@ -44,6 +47,7 @@ const Panel2: React.FC<Props> = ({
           type="text"
           value={street}
           onChange={(e) => setStreet(e.target.value)}
+          disabled={readonly}
         />
       </FormControl>
       <FormControl required>
@@ -53,6 +57,7 @@ const Panel2: React.FC<Props> = ({
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
+          disabled={readonly}
         />
       </FormControl>
       <FormControl required>
@@ -62,6 +67,7 @@ const Panel2: React.FC<Props> = ({
           type="text"
           value={state}
           onChange={(e) => setState(e.target.value)}
+          disabled={readonly}
         />
       </FormControl>
       <FormControl required>
@@ -71,6 +77,7 @@ const Panel2: React.FC<Props> = ({
           type="text"
           value={zip}
           onChange={(e) => setZip(e.target.value)}
+          disabled={readonly}
         />
       </FormControl>
     </TabPanel>

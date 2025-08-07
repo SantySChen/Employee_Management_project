@@ -5,9 +5,17 @@ interface Props {
   imagePreview: string | null;
   setImagePreview: (url: string | null) => void;
   setProfilePicUrl: (url: string) => void;
+  setProfilePicFile: (file: File) => void;
+  readonly: boolean;
 }
 
-const Panel1: React.FC<Props> = ({ imagePreview, setImagePreview, setProfilePicUrl }) => {
+const Panel1: React.FC<Props> = ({
+  imagePreview,
+  setImagePreview,
+  setProfilePicUrl,
+  setProfilePicFile,
+  readonly,
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,19 +23,14 @@ const Panel1: React.FC<Props> = ({ imagePreview, setImagePreview, setProfilePicU
     if (!file) return;
 
     const previewUrl = URL.createObjectURL(file);
-    setImagePreview(previewUrl);     
-    setProfilePicUrl(previewUrl);    
+    setImagePreview(previewUrl);
+    setProfilePicUrl(previewUrl);
+    setProfilePicFile(file);
   };
-
 
   return (
     <TabPanel value={1}>
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        gap={2}
-      >
+      <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
         {imagePreview ? (
           <img
             src={imagePreview}
@@ -61,9 +64,11 @@ const Panel1: React.FC<Props> = ({ imagePreview, setImagePreview, setProfilePicU
           onChange={handleFileChange}
         />
 
-        <Button onClick={() => fileInputRef.current?.click()}>
-          {imagePreview ? "Change Image" : "Upload Image"}
-        </Button>
+        {!readonly && (
+          <Button onClick={() => fileInputRef.current?.click()}>
+            {imagePreview ? "Change Image" : "Upload Image"}
+          </Button>
+        )}
       </Box>
     </TabPanel>
   );

@@ -6,6 +6,7 @@ import {
   updateOnboardingByUserId,
 } from "./onboardingAPI";
 import { parseErrorMessage } from "../../app/utils/parseErrorMessage";
+import { logout } from "../auth/authSlice";
 
 interface OnboardingState {
   data: Onboarding | null;
@@ -109,7 +110,9 @@ const onboardingSlice = createSlice({
       .addCase(updateOnboarding.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to update onboarding.";
-      });
+      })
+      // logout
+      .addCase(logout, () => initialState);
   },
 });
 

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import routes from "./routes";
+import { seedRouter } from "./seedRouter";
 
 dotenv.config();
 
@@ -19,16 +20,16 @@ mongoose
   });
 
 const app = express();
+
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:5173/"],
+    origin: ["http://localhost:5173"],
   })
 );
 
-app.use(express.json())
-
 app.use('/api', routes)
+app.use('/api/seed', seedRouter)
 
 app.get('/', (req, res) => {
   res.send('Employee Management API is running')

@@ -4,10 +4,10 @@ import { create, getOnboardingByUserId, updateOnboardingByUserId } from "../cont
 
 const router = Router()
 
-
 router.post(
   "/",
   upload.fields([
+    { name: "optReceipt", maxCount: 1 },
     { name: "profilePic", maxCount: 1 },
     { name: "driverLicense", maxCount: 1 },
     { name: "workAuth", maxCount: 1 },
@@ -18,6 +18,7 @@ router.get("/:userId", getOnboardingByUserId);
 router.put(
   "/:userId",
   upload.fields([
+    { name: "optReceipt", maxCount: 1 },
     { name: "profilePic", maxCount: 1 },
     { name: "driverLicense", maxCount: 1 },
     { name: "workAuth", maxCount: 1 },

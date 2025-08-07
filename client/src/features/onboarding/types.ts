@@ -1,5 +1,3 @@
-// types.ts
-
 export interface Address {
   building: string;
   street: string;
@@ -54,7 +52,7 @@ export type OnboardingStatus = "Pending" | "Approved" | "Rejected";
 
 export interface Onboarding {
   _id?: string;
-  userId: string;
+  userId: string | { _id: string };
   firstName?: string;
   lastName?: string;
   middleName?: string;

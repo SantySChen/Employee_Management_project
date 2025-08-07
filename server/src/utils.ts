@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { IUserJWT } from "./types";
@@ -5,6 +6,8 @@ import nodemailer from "nodemailer";
 import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from 'multer'
+
+dotenv.config();
 
 // generate JWT token
 export const generateToken = (payload: object): string => {
@@ -85,11 +88,17 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => ({
-    folder: 'employee_uploads',
-    resource_type: file.mimetype.startsWith('image/') ? 'image' : 'auto',
-    public_id: `${Date.now()}-&{file.originalname}`,
-  }),
+  params: async (req, file) => {
+    const isPdf = file.mimetype === "application/pdf";
+
+    return {
+      folder: "onboarding_uploads",
+      resource_type: "auto", 
+      type: "upload",                  
+      format: isPdf ? "pdf" : undefined, 
+      public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`,
+    };
+  },
 });
 
 export const upload = multer({ storage })

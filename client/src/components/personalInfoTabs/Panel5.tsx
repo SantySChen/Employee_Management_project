@@ -16,9 +16,10 @@ interface Props {
   setSsn: (value: string) => void;
   setDob: (value: string) => void;
   setGender: (value: "male" | "female" | "prefer_not_to_say") => void;
+  readonly: boolean;
 }
 
-const Panel5: React.FC<Props> = ({ ssn, dob, gender, setSsn, setDob, setGender }) => {
+const Panel5: React.FC<Props> = ({ ssn, dob, gender, setSsn, setDob, setGender, readonly }) => {
   return (
     <TabPanel value={5}>
       <FormControl>
@@ -31,6 +32,7 @@ const Panel5: React.FC<Props> = ({ ssn, dob, gender, setSsn, setDob, setGender }
               value={ssn}
               onChange={(e) => setSsn(e.target.value)}
               placeholder="Enter your SSN"
+              disabled={readonly}
             />
           </FormControl>
           <FormControl required>
@@ -40,6 +42,7 @@ const Panel5: React.FC<Props> = ({ ssn, dob, gender, setSsn, setDob, setGender }
               type="date"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
+              disabled={readonly}
             />
           </FormControl>
           <FormControl required>
@@ -51,9 +54,9 @@ const Panel5: React.FC<Props> = ({ ssn, dob, gender, setSsn, setDob, setGender }
                 setGender(e.target.value as "male" | "female" | "prefer_not_to_say")
               }
             >
-              <Radio value="male" label="Male" />
-              <Radio value="female" label="Female" />
-              <Radio value="prefer_not_to_say" label="I do not wish to answer" />
+              <Radio value="male" label="Male" disabled={readonly} />
+              <Radio value="female" label="Female" disabled={readonly} />
+              <Radio value="prefer_not_to_say" label="I do not wish to answer" disabled={readonly}/>
             </RadioGroup>
           </FormControl>
         </Stack>

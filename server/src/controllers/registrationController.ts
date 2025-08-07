@@ -5,7 +5,7 @@ import { sendEmail } from '../utils'
 import { RegistrationTokenModel, UserModel } from '../models'
 
 export const generateRegistrationToken = async (req: Request, res: Response) => {
-  const { email, fullName } = req.body
+  const { email } = req.body
   const existingUser = await UserModel.findOne({ email });
 
   if (existingUser) {
@@ -23,7 +23,7 @@ export const generateRegistrationToken = async (req: Request, res: Response) => 
     await sendEmail(
       email,
       'Complete your employee registration',
-      `<p>Hi ${fullName},</p>
+      `<p>Hi new user,</p>
       <p>Please complete your registration:</p>
       <a href="${link}">${link}</a>
       <p>This link will expire in 3 hours.</p>`
@@ -52,7 +52,7 @@ export const verifyRegistrationToken = async (req: Request, res: Response) => {
 }
 
 export const completeRegistration = async (req: Request, res: Response) => {
-  const { token, username, password } = req.body
+  const { token, username, password, email } = req.body
 
   try {
     const tokenRecord = await RegistrationTokenModel.findOne({ token })
@@ -62,7 +62,7 @@ export const completeRegistration = async (req: Request, res: Response) => {
     }
 
     const existingUser = await UserModel.findOne({
-      $or: [{ username }, { email: tokenRecord.email }],
+      $or: [{ username }, { email }],
     })
 
     if (existingUser) {
@@ -73,7 +73,7 @@ export const completeRegistration = async (req: Request, res: Response) => {
 
     const newUser = new UserModel({
       username,
-      email: tokenRecord.email,
+      email,
       password: hashedPassword,
       role: 'EMPLOYEE', 
     })

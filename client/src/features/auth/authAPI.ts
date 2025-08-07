@@ -7,11 +7,11 @@ export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
 }
 
 export const verifyRegistrationToken = async (token: string): Promise<{ valid: boolean }> => {
-  const res = await axios.get<{ valid: boolean }>(`/auth/verify/${token}`);
+  const res = await axios.get<{ valid: boolean }>(`/registration/verify/${token}`);
   return res.data;
 };
 
 export const completeRegistration = async (data: RegisterRequest): Promise<AuthResponse> => {
-  const res = await axios.post<AuthResponse>(`/auth/complete`, data);
+  const res = await axios.post<AuthResponse>('/registration/complete', data);
   return res.data; 
 };

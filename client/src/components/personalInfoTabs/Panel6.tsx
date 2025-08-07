@@ -21,15 +21,14 @@ interface Props {
   endDate: string;
   setIsCitizenOrResident: (val: "yes" | "no") => void;
   setResidentTitle: (val: "Green Card" | "Citizen") => void;
-  setVisaType: (
-    val: "H1-B" | "L2" | "F1(CPT/OPT)" | "H4" | "Other"
-  ) => void;
+  setVisaType: (val: "H1-B" | "L2" | "F1(CPT/OPT)" | "H4" | "Other") => void;
   setOtherTitle: (val: string) => void;
   setOptReceipt: (file: File) => void;
   setStartDate: (val: string) => void;
   setEndDate: (val: string) => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
   handleUploadClick: () => void;
+  readonly: boolean;
 }
 
 const Panel6: React.FC<Props> = ({
@@ -49,6 +48,7 @@ const Panel6: React.FC<Props> = ({
   setEndDate,
   fileInputRef,
   handleUploadClick,
+  readonly,
 }) => {
   return (
     <TabPanel value={6}>
@@ -64,8 +64,8 @@ const Panel6: React.FC<Props> = ({
               setIsCitizenOrResident(e.target.value as "yes" | "no")
             }
           >
-            <Radio value="yes" label="Yes" />
-            <Radio value="no" label="No" />
+            <Radio value="yes" label="Yes" disabled={readonly} />
+            <Radio value="no" label="No" disabled={readonly} />
           </RadioGroup>
         </FormControl>
 
@@ -79,8 +79,12 @@ const Panel6: React.FC<Props> = ({
                 setResidentTitle(e.target.value as "Green Card" | "Citizen")
               }
             >
-              <Radio value="Green Card" label="Green Card" />
-              <Radio value="Citizen" label="Citizen" />
+              <Radio
+                value="Green Card"
+                label="Green Card"
+                disabled={readonly}
+              />
+              <Radio value="Citizen" label="Citizen" disabled={readonly} />
             </RadioGroup>
           </FormControl>
         )}
@@ -103,11 +107,15 @@ const Panel6: React.FC<Props> = ({
                   )
                 }
               >
-                <Radio value="H1-B" label="H1-B" />
-                <Radio value="L2" label="L2" />
-                <Radio value="F1(CPT/OPT)" label="F1 (CPT/OPT)" />
-                <Radio value="H4" label="H4" />
-                <Radio value="Other" label="Other" />
+                <Radio value="H1-B" label="H1-B" disabled={readonly} />
+                <Radio value="L2" label="L2" disabled={readonly} />
+                <Radio
+                  value="F1(CPT/OPT)"
+                  label="F1 (CPT/OPT)"
+                  disabled={readonly}
+                />
+                <Radio value="H4" label="H4" disabled={readonly} />
+                <Radio value="Other" label="Other" disabled={readonly} />
               </RadioGroup>
             </FormControl>
 
@@ -124,9 +132,12 @@ const Panel6: React.FC<Props> = ({
                   }}
                   style={{ display: "none" }}
                 />
-                <Button onClick={handleUploadClick}>
-                  {optReceipt ? "Change OPT Receipt" : "Upload OPT Receipt"}
-                </Button>
+                {!readonly && (
+                  <Button onClick={handleUploadClick}>
+                    {optReceipt ? "Change OPT Receipt" : "Upload OPT Receipt"}
+                  </Button>
+                )}
+
                 {optReceipt && (
                   <Typography level="body-sm">
                     Selected: {optReceipt.name}
@@ -142,6 +153,7 @@ const Panel6: React.FC<Props> = ({
                   name="otherVisaTitle"
                   value={otherTitle}
                   onChange={(e) => setOtherTitle(e.target.value)}
+                  disabled={readonly}
                 />
               </FormControl>
             )}
@@ -153,6 +165,7 @@ const Panel6: React.FC<Props> = ({
                 name="startDate"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                disabled={readonly}
               />
             </FormControl>
 
@@ -163,6 +176,7 @@ const Panel6: React.FC<Props> = ({
                 name="endDate"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                disabled={readonly}
               />
             </FormControl>
           </>

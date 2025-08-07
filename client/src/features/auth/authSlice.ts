@@ -13,9 +13,9 @@ import type {
 import { parseErrorMessage } from "../../app/utils/parseErrorMessage";
 
 const initialState: AuthState = {
-  user: null,
-  token: null,
-  email: null,
+  user: JSON.parse(localStorage.getItem("user") || "null"),
+  token: localStorage.getItem("token"),
+  email: localStorage.getItem("email") || null,
   loading: false,
   error: null,
 };
@@ -29,8 +29,8 @@ export const login = createAsyncThunk<
     const res = await loginAPI(payload);
     localStorage.setItem("token", res.token);
     return res;
-  } catch (err: unknown) {
-    return thunkAPI.rejectWithValue(parseErrorMessage(err));
+  } catch (err) {
+    return thunkAPI.rejectWithValue(parseErrorMessage(err) as string);
   }
 });
 
@@ -42,7 +42,7 @@ export const verifyToken = createAsyncThunk<
   try {
     const res = await verifyRegistrationToken(token);
     return res;
-  } catch (err: unknown) {
+  } catch (err) {
     return thunkAPI.rejectWithValue(parseErrorMessage(err));
   }
 });
@@ -56,7 +56,7 @@ export const register = createAsyncThunk<
     const res = await completeRegistration(payload);
     localStorage.setItem("token", res.token);
     return res;
-  } catch (err: unknown) {
+  } catch (err) {
     return thunkAPI.rejectWithValue(parseErrorMessage(err));
   }
 });
@@ -70,6 +70,8 @@ const authSlice = createSlice({
       state.token = null;
       state.email = null;
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("email");
     },
   },
   extraReducers: (builder) => {
@@ -83,10 +85,15 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        state.email = action.payload.user.email;
+
+        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+        localStorage.setItem("email", action.payload.user.email);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload || "Login failed";
       })
       // verifyToken
       .addCase(verifyToken.pending, (state) => {

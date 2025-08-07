@@ -6,6 +6,7 @@ interface Props {
   workPhone: string;
   setCellPhone: (value: string) => void;
   setWorkPhone: (value: string) => void;
+  readonly: boolean;
 }
 
 const Panel3: React.FC<Props> = ({
@@ -13,6 +14,7 @@ const Panel3: React.FC<Props> = ({
   workPhone,
   setCellPhone,
   setWorkPhone,
+  readonly
 }) => {
   return (
     <TabPanel value={3}>
@@ -23,6 +25,7 @@ const Panel3: React.FC<Props> = ({
           type="text"
           value={cellPhone}
           onChange={(e) => setCellPhone(e.target.value)}
+          disabled={readonly}
         />
       </FormControl>
       <FormControl>
@@ -32,7 +35,7 @@ const Panel3: React.FC<Props> = ({
           type="text"
           value={workPhone}
           onChange={(e) => setWorkPhone(e.target.value)}
-          required
+          disabled={readonly}
         />
       </FormControl>
     </TabPanel>

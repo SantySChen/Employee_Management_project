@@ -33,6 +33,7 @@ interface Props {
   ) => void;
   addEmergencyContact: () => void;
   removeEmergencyContact: (index: number) => void;
+  readonly: boolean;
 }
 
 const Panel7: React.FC<Props> = ({
@@ -44,6 +45,7 @@ const Panel7: React.FC<Props> = ({
   handleEmergencyChange,
   addEmergencyContact,
   removeEmergencyContact,
+  readonly,
 }) => {
   const referenceFields: (keyof Reference)[] = [
     "firstName",
@@ -57,46 +59,60 @@ const Panel7: React.FC<Props> = ({
   return (
     <TabPanel value={7}>
       <Stack spacing={3}>
-        <Typography>Reference (Optional)</Typography>
-
-        {!showReference ? (
-          <Button onClick={() => setShowReference(true)}>Add Reference</Button>
-        ) : (
+        {(!readonly ||
+          showReference ||
+          Object.values(reference).some((val) => val)) && (
           <>
-            <Button
-              variant="soft"
-              color="danger"
-              onClick={() => {
-                setShowReference(false);
-                setReference({
-                  firstName: "",
-                  lastName: "",
-                  middleName: "",
-                  phone: "",
-                  email: "",
-                  relationship: "",
-                });
-              }}
-            >
-              Remove Reference
-            </Button>
-            <Stack spacing={2}>
-              {referenceFields.map((field) => (
-                <FormControl key={field}>
-                  <FormLabel>{field.replace(/^\w/, (c) => c.toUpperCase())}</FormLabel>
-                  <Input
-                    type={field === "email" ? "email" : "text"}
-                    value={reference[field]}
-                    onChange={(e) =>
+            <Typography>Reference (Optional)</Typography>
+
+            {!showReference && !readonly ? (
+              <Button onClick={() => setShowReference(true)}>
+                Add Reference
+              </Button>
+            ) : (
+              <>
+                {!readonly && (
+                  <Button
+                    variant="soft"
+                    color="danger"
+                    onClick={() => {
+                      setShowReference(false);
                       setReference({
-                        ...reference,
-                        [field]: e.target.value,
-                      })
-                    }
-                  />
-                </FormControl>
-              ))}
-            </Stack>
+                        firstName: "",
+                        lastName: "",
+                        middleName: "",
+                        phone: "",
+                        email: "",
+                        relationship: "",
+                      });
+                    }}
+                    disabled={readonly}
+                  >
+                    Remove Reference
+                  </Button>
+                )}
+                <Stack spacing={2}>
+                  {referenceFields.map((field) => (
+                    <FormControl key={field}>
+                      <FormLabel>
+                        {field.replace(/^\w/, (c) => c.toUpperCase())}
+                      </FormLabel>
+                      <Input
+                        type={field === "email" ? "email" : "text"}
+                        value={reference[field]}
+                        onChange={(e) =>
+                          setReference({
+                            ...reference,
+                            [field]: e.target.value,
+                          })
+                        }
+                        disabled={readonly}
+                      />
+                    </FormControl>
+                  ))}
+                </Stack>
+              </>
+            )}
           </>
         )}
 
@@ -113,23 +129,29 @@ const Panel7: React.FC<Props> = ({
             {referenceFields.map((field) => (
               <FormControl
                 key={field}
-                required={["firstName", "lastName", "relationship"].includes(field)}
+                required={["firstName", "lastName", "relationship"].includes(
+                  field
+                )}
               >
-                <FormLabel>{field.replace(/^\w/, (c) => c.toUpperCase())}</FormLabel>
+                <FormLabel>
+                  {field.replace(/^\w/, (c) => c.toUpperCase())}
+                </FormLabel>
                 <Input
                   type={field === "email" ? "email" : "text"}
                   value={contact[field]}
                   onChange={(e) =>
                     handleEmergencyChange(idx, field, e.target.value)
                   }
+                  disabled={readonly}
                 />
               </FormControl>
             ))}
-            {emergencyContacts.length > 1 && (
+            {emergencyContacts.length > 1 && !readonly && (
               <IconButton
                 variant="soft"
                 color="danger"
                 onClick={() => removeEmergencyContact(idx)}
+                disabled={readonly}
               >
                 <Delete />
               </IconButton>
@@ -137,11 +159,14 @@ const Panel7: React.FC<Props> = ({
           </Stack>
         ))}
 
-        <Button onClick={addEmergencyContact}>Add Another Emergency Contact</Button>
+        {!readonly && (
+          <Button onClick={addEmergencyContact}>
+            Add Another Emergency Contact
+          </Button>
+        )}
       </Stack>
     </TabPanel>
   );
 };
 
 export default Panel7;
-

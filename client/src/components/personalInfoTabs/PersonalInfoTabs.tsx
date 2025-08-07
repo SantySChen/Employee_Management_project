@@ -18,7 +18,11 @@ import Panel5 from "./Panel5";
 import Panel6 from "./Panel6";
 import Panel7 from "./Panel7";
 import Panel8 from "./Panel8";
-import { submitOnboarding } from "../../features/onboarding/onboardingSlice";
+import {
+  fetchOnboarding,
+  submitOnboarding,
+  updateOnboarding,
+} from "../../features/onboarding/onboardingSlice";
 
 const initialReference = {
   firstName: "",
@@ -38,12 +42,21 @@ const initialEmergencyContact = {
   relationship: "",
 };
 
-const PersonalInfoTabs: React.FC = () => {
+interface Props {
+  userId?: string;
+  readonly?: boolean;
+}
+
+const PersonalInfoTabs: React.FC<Props> = ({ userId, readonly = false }) => {
   const dispatch = useAppDispatch();
   const onboarding = useAppSelector((state) => state.onboarding.data);
-  const isReadonly = onboarding?.status === "Pending";
+  const isReadonly = readonly || onboarding?.status === "Pending";
 
-  const { loading, email: registeredEmail } = useAppSelector((state) => state.auth);
+  const {
+    user,
+    loading,
+    email: registeredEmail,
+  } = useAppSelector((state) => state.auth);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -82,6 +95,9 @@ const PersonalInfoTabs: React.FC = () => {
   const [profilePicUrl, setProfilePicUrl] = useState("");
   const [driverLicenseUrl, setDriverLicenseUrl] = useState("");
   const [workAuthUrl, setWorkAuthUrl] = useState("");
+  const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
+  const [driverLicenseFile, setDriverLicenseFile] = useState<File | null>(null);
+  const [workAuthFile, setWorkAuthFile] = useState<File | null>(null);
 
   const [reference, setReference] = useState(initialReference);
   const [emergencyContacts, setEmergencyContacts] = useState([
@@ -89,10 +105,16 @@ const PersonalInfoTabs: React.FC = () => {
   ]);
 
   useEffect(() => {
-    if (registeredEmail) {
-    setEmail(registeredEmail);
-  }
+    console.log("📸 profilePicFile in parent:", profilePicFile);
+  }, [profilePicFile]);
 
+  useEffect(() => {
+    const idToFetch = userId || user?._id;
+    if (!idToFetch) return;
+    dispatch(fetchOnboarding(idToFetch));
+  }, [dispatch, userId, user]);
+
+  useEffect(() => {
     if (onboarding) {
       setFirstname(onboarding.firstName || "");
       setMiddlename(onboarding.middleName || "");
@@ -139,6 +161,8 @@ const PersonalInfoTabs: React.FC = () => {
         setStartDate(status.startDate || "");
         setEndDate(status.endDate || "");
       }
+    } else if (!onboarding && user?.email) {
+      setEmail(user.email);
     }
   }, [onboarding, registeredEmail]);
 
@@ -146,44 +170,121 @@ const PersonalInfoTabs: React.FC = () => {
     e.preventDefault();
     const formData = new FormData();
 
-    formData.set("firstName", firstname);
-    formData.set("middleName", middlename);
-    formData.set("lastName", lastname);
-    formData.set("preferredName", preferredname);
-    formData.set("email", email);
-    formData.set("ssn", ssn);
-    formData.set("dob", dob);
-    formData.set("gender", gender);
+    if (user?._id) {
+      formData.append("userId", user._id);
+    }
 
-    formData.set(
+    formData.append("firstName", firstname);
+    formData.append("middleName", middlename);
+    formData.append("lastName", lastname);
+    formData.append("preferredName", preferredname);
+    formData.append("email", email);
+    formData.append("ssn", ssn);
+    formData.append("dob", dob);
+    formData.append("gender", gender);
+
+    formData.append(
       "address",
       JSON.stringify({ building, street, city, state, zip })
     );
 
-    formData.set("contact", JSON.stringify({ cellPhone, workPhone }));
+    formData.append("contact", JSON.stringify({ cellPhone, workPhone }));
 
-    formData.set(
+    formData.append(
       "usResidentStatus",
       JSON.stringify({
         isCitizenOrResident: isCitizenOrResident === "yes",
         title: residentTitle || undefined,
         visaType: visaType || undefined,
         otherTitle,
-        optReceipt: optReceipt ? optReceipt.name : undefined,
         startDate,
         endDate,
       })
     );
 
-    formData.set("reference", JSON.stringify(reference));
-    formData.set("emergencyContacts", JSON.stringify(emergencyContacts));
+    formData.append("reference", JSON.stringify(reference));
+    formData.append("emergencyContacts", JSON.stringify(emergencyContacts));
 
-    if (optReceipt) formData.set("optReceipt", optReceipt);
-    if (profilePicUrl) formData.set("profilePic", profilePicUrl);
-    if (driverLicenseUrl) formData.set("driverLicense", driverLicenseUrl);
-    if (workAuthUrl) formData.set("workAuth", workAuthUrl);
+    console.log("📎 Appending profilePicFile:", profilePicFile);
+
+    if (optReceipt) formData.append("optReceipt", optReceipt);
+    if (profilePicFile) formData.append("profilePic", profilePicFile);
+    if (driverLicenseFile) {
+      const ext = driverLicenseFile.name.endsWith(".pdf") ? "" : ".pdf";
+      const renamed = new File([driverLicenseFile], `driverlicense${ext}`, {
+        type: driverLicenseFile.type,
+      });
+      formData.append("driverLicense", renamed);
+    }
+    if (workAuthFile) {
+      const ext = workAuthFile.name.endsWith(".pdf") ? "" : ".pdf";
+      const renamed = new File([workAuthFile], `workauthorization${ext}`, {
+        type: workAuthFile.type,
+      });
+      formData.append("workAuth", renamed);
+    }
+
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
 
     dispatch(submitOnboarding(formData));
+  };
+
+  const handleResubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    if (user?._id) {
+      formData.append("userId", user._id);
+    }
+
+    formData.append("firstName", firstname);
+    formData.append("middleName", middlename);
+    formData.append("lastName", lastname);
+    formData.append("preferredName", preferredname);
+    formData.append("email", email);
+    formData.append("ssn", ssn);
+    formData.append("dob", dob);
+    formData.append("gender", gender);
+
+    formData.append(
+      "address",
+      JSON.stringify({ building, street, city, state, zip })
+    );
+    formData.append("contact", JSON.stringify({ cellPhone, workPhone }));
+    formData.append(
+      "usResidentStatus",
+      JSON.stringify({
+        isCitizenOrResident: isCitizenOrResident === "yes",
+        title: residentTitle || undefined,
+        visaType: visaType || undefined,
+        otherTitle,
+        startDate,
+        endDate,
+      })
+    );
+    formData.append("reference", JSON.stringify(reference));
+    formData.append("emergencyContacts", JSON.stringify(emergencyContacts));
+
+    if (optReceipt) formData.append("optReceipt", optReceipt);
+    if (profilePicFile) formData.append("profilePic", profilePicFile);
+    if (driverLicenseFile) {
+      const ext = driverLicenseFile.name.endsWith(".pdf") ? "" : ".pdf";
+      const renamed = new File([driverLicenseFile], `driverlicense${ext}`, {
+        type: driverLicenseFile.type,
+      });
+      formData.append("driverLicense", renamed);
+    }
+    if (workAuthFile) {
+      const ext = workAuthFile.name.endsWith(".pdf") ? "" : ".pdf";
+      const renamed = new File([workAuthFile], `workauthorization${ext}`, {
+        type: workAuthFile.type,
+      });
+      formData.append("workAuth", renamed);
+    }
+
+    dispatch(updateOnboarding({ userId: user?._id || "", formData }));
   };
 
   const handleUploadClick = () => {
@@ -268,6 +369,8 @@ const PersonalInfoTabs: React.FC = () => {
                 imagePreview={imagePreview}
                 setImagePreview={setImagePreview}
                 setProfilePicUrl={setProfilePicUrl}
+                setProfilePicFile={setProfilePicFile}
+                readonly={isReadonly}
               />
             </TabPanel>
             <TabPanel value={2}>
@@ -282,6 +385,7 @@ const PersonalInfoTabs: React.FC = () => {
                 setCity={setCity}
                 setState={setState}
                 setZip={setZip}
+                readonly={isReadonly}
               />
             </TabPanel>
             <TabPanel value={3}>
@@ -290,6 +394,7 @@ const PersonalInfoTabs: React.FC = () => {
                 workPhone={workPhone}
                 setCellPhone={setCellPhone}
                 setWorkPhone={setWorkPhone}
+                readonly={isReadonly}
               />
             </TabPanel>
             <TabPanel value={4}>
@@ -303,6 +408,7 @@ const PersonalInfoTabs: React.FC = () => {
                 setSsn={setSsn}
                 setDob={setDob}
                 setGender={setGender}
+                readonly={isReadonly}
               />
             </TabPanel>
             <TabPanel value={6}>
@@ -323,6 +429,7 @@ const PersonalInfoTabs: React.FC = () => {
                 setEndDate={setEndDate}
                 fileInputRef={fileInputRef}
                 handleUploadClick={handleUploadClick}
+                readonly={isReadonly}
               />
             </TabPanel>
             <TabPanel value={7}>
@@ -335,16 +442,20 @@ const PersonalInfoTabs: React.FC = () => {
                 handleEmergencyChange={handleEmergencyChange}
                 addEmergencyContact={addEmergencyContact}
                 removeEmergencyContact={removeEmergencyContact}
+                readonly={isReadonly}
               />
             </TabPanel>
             <TabPanel value={8}>
               <Panel8
                 profilePicUrl={profilePicUrl}
                 setProfilePicUrl={setProfilePicUrl}
+                setProfilePicFile={setProfilePicFile}
                 driverLicenseUrl={driverLicenseUrl}
                 setDriverLicenseUrl={setDriverLicenseUrl}
+                setDriverLicenseFile={setDriverLicenseFile}
                 workAuthUrl={workAuthUrl}
                 setWorkAuthUrl={setWorkAuthUrl}
+                setWorkAuthFile={setWorkAuthFile}
                 readonly={isReadonly}
               />
             </TabPanel>
@@ -352,9 +463,20 @@ const PersonalInfoTabs: React.FC = () => {
         </Tabs>
       </Box>
 
-      {!isReadonly && (
-        <Button type="submit" sx={{ mt: 1 }} disabled={loading}>
-          {loading ? "Loading..." : "Submit"}
+      {!isReadonly && onboarding?.status !== "Approved" && (
+        <Button
+          type="submit"
+          sx={{ mt: 1 }}
+          disabled={loading}
+          onClick={
+            onboarding?.status === "Rejected" ? handleResubmit : handleSubmit
+          }
+        >
+          {loading
+            ? "Loading..."
+            : onboarding?.status === "Rejected"
+            ? "Resubmit"
+            : "Submit"}
         </Button>
       )}
     </form>

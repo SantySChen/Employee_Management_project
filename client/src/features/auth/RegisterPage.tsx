@@ -9,13 +9,14 @@ import {
 } from "@mui/joy";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { register } from "./authSlice";
 
 const RegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { loading, error } = useAppSelector((state) => state.auth);
+  const { token } = useParams<{ token: string }>();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +37,7 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    dispatch(register({ username, password, email }))
+    dispatch(register({ username, password, email, token: token || "" }))
       .unwrap()
       .then(() => {
         navigate("/login");
