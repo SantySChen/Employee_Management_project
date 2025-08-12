@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { Onboarding } from "./types";
+import type { Onboarding, OnboardingState } from "./types";
 import {
   create,
   getOnboardingByUserId,
@@ -7,12 +7,6 @@ import {
 } from "./onboardingAPI";
 import { parseErrorMessage } from "../../app/utils/parseErrorMessage";
 import { logout } from "../auth/authSlice";
-
-interface OnboardingState {
-  data: Onboarding | null;
-  loading: boolean;
-  error: string | null;
-}
 
 const initialState: OnboardingState = {
   data: null,

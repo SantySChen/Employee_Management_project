@@ -9,7 +9,7 @@ const OnboardingPage: React.FC = () => {
   return (
     <Box
       display="flex"
-      flexDirection={{ xs: "column", md: "row" }}
+      flexDirection={{ xs: "column", md: "column" }}
       alignItems={{ xs: "stretch", md: "center" }}
       gap={3}
       width="100%"

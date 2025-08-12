@@ -8,11 +8,11 @@ export class Onboarding {
   @prop({ ref: () => User, required: true })
   public userId!: Ref<User>;
 
-  @prop()
-  public firstName?: string;
+  @prop({ required: true })
+  public firstName!: string;
 
-  @prop()
-  public lastName?: string;
+  @prop({ required: true })
+  public lastName!: string;
 
   @prop()
   public middleName?: string;
@@ -23,8 +23,8 @@ export class Onboarding {
   @prop()
   public profilePic?: string;
 
-  @prop()
-  public address?: {
+  @prop({ required: true })
+  public address!: {
     building: string;
     street: string;
     city: string;
@@ -32,8 +32,8 @@ export class Onboarding {
     zip: string;
   };
 
-  @prop()
-  public contact?: {
+  @prop({ required: true })
+  public contact!: {
     cellPhone: string;
     workPhone?: string;
   };
@@ -41,17 +41,17 @@ export class Onboarding {
   @prop({ required: true })
   public email!: string;
 
-  @prop()
-  public ssn?: string;
+  @prop({ required: true })
+  public ssn!: string;
 
-  @prop()
-  public dob?: string;
+  @prop({ required: true })
+  public dob!: string;
 
-  @prop()
-  public gender?: "male" | "female" | "prefer_not_to_say";
+  @prop({ required: true })
+  public gender!: "male" | "female" | "prefer_not_to_say";
 
-  @prop()
-  public usResidentStatus?: {
+  @prop({ required: true })
+  public usResidentStatus!: {
     isCitizenOrResident: boolean;
     title?: "Green Card" | "Citizen";
     visaType?: "H1-B" | "L2" | "F1(CPT/OPT)" | "H4" | "Other";
@@ -71,8 +71,8 @@ export class Onboarding {
     relationship: string;
   };
 
-  @prop({ type: () => [Object] })
-  public emergencyContacts?: {
+  @prop({ type: () => [Object], required: true })
+  public emergencyContacts!: {
     firstName: string;
     lastName: string;
     middleName?: string;

@@ -31,6 +31,23 @@ const AppRoutes = () => {
       {user && !isAuthPage && <Header />}
 
       <Routes>
+        {!user ? (
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        ) : !isHR && !isEmployeeApproved ? (
+          <Route path="*" element={<Navigate to="/onboard" replace />} />
+        ) : (
+          <Route
+            path="*"
+            element={
+              isHR ? (
+                <Navigate to="/hr" replace />
+              ) : (
+                <Navigate to="/employee/personal" replace />
+              )
+            }
+          />
+        )}
+
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register/:token" element={<RegisterWithTokenPage />} />
@@ -52,19 +69,11 @@ const AppRoutes = () => {
             <Route path="/visa" element={<VisaPage />} />
           </>
         )}
-        
+
         {!isHR && (
           <>
             <Route path="/onboard" element={<OnboardingPage />} />
           </>
-        )}
-
-        {!user ? (
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        ) : !isHR && !isEmployeeApproved ? (
-          <Route path="*" element={<Navigate to="/onboard" replace />} />
-        ) : (
-          <Route path="*" element={<Navigate to="/" replace />} />
         )}
       </Routes>
     </>

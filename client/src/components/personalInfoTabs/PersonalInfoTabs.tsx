@@ -104,6 +104,8 @@ const PersonalInfoTabs: React.FC<Props> = ({ userId, readonly = false }) => {
     { ...initialEmergencyContact },
   ]);
 
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   useEffect(() => {
     console.log("📸 profilePicFile in parent:", profilePicFile);
   }, [profilePicFile]);
@@ -168,6 +170,45 @@ const PersonalInfoTabs: React.FC<Props> = ({ userId, readonly = false }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!firstname || !firstname.trim()) {
+      setValidationError("First name is required.");
+      return;
+    }
+
+    if (!lastname || !lastname.trim()) {
+      setValidationError("Last name is required.");
+      return;
+    }
+
+    if (
+      !building || !building.trim() ||
+      !street || !street.trim() ||
+      !city || !city.trim() ||
+      !state || !state.trim() ||
+      !zip || !zip.trim()
+    ) {
+      setValidationError("Complete address is required.");
+      return;
+    }
+
+    if (!cellPhone || !cellPhone.trim()) {
+      setValidationError("Cell phone number is required.");
+      return;
+    }
+
+    if(!ssn || !ssn.trim()) {
+      setValidationError("SSN is required.");
+      return;
+    }
+
+    if (!dob || !dob.trim()) {
+      setValidationError("Date of birth is required.");
+      return;
+    }
+
+    setValidationError(null);
+
     const formData = new FormData();
 
     if (user?._id) {
@@ -205,8 +246,6 @@ const PersonalInfoTabs: React.FC<Props> = ({ userId, readonly = false }) => {
     formData.append("reference", JSON.stringify(reference));
     formData.append("emergencyContacts", JSON.stringify(emergencyContacts));
 
-    console.log("📎 Appending profilePicFile:", profilePicFile);
-
     if (optReceipt) formData.append("optReceipt", optReceipt);
     if (profilePicFile) formData.append("profilePic", profilePicFile);
     if (driverLicenseFile) {
@@ -233,6 +272,38 @@ const PersonalInfoTabs: React.FC<Props> = ({ userId, readonly = false }) => {
 
   const handleResubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!firstname || !firstname.trim()) {
+      setValidationError("First name is required.");
+      return;
+    }
+
+    if (!lastname || !lastname.trim()) {
+      setValidationError("Last name is required.");
+      return;
+    }
+
+    if (!dob || !dob.trim()) {
+      setValidationError("Date of birth is required.");
+      return;
+    }
+
+    if (
+      !building.trim() ||
+      !street.trim() ||
+      !city.trim() ||
+      !state.trim() ||
+      !zip.trim()
+    ) {
+      setValidationError("Complete address is required.");
+      return;
+    }
+    if (!cellPhone || !cellPhone.trim()) {
+      setValidationError("Cell phone number is required.");
+      return;
+    }
+
+    setValidationError(null);
 
     const formData = new FormData();
     if (user?._id) {
@@ -464,20 +535,27 @@ const PersonalInfoTabs: React.FC<Props> = ({ userId, readonly = false }) => {
       </Box>
 
       {!isReadonly && onboarding?.status !== "Approved" && (
-        <Button
-          type="submit"
-          sx={{ mt: 1 }}
-          disabled={loading}
-          onClick={
-            onboarding?.status === "Rejected" ? handleResubmit : handleSubmit
-          }
-        >
-          {loading
-            ? "Loading..."
-            : onboarding?.status === "Rejected"
-            ? "Resubmit"
-            : "Submit"}
-        </Button>
+        <>
+          {validationError && (
+            <Typography color="danger" level="body-sm" sx={{ mb: 2 }}>
+              {validationError}
+            </Typography>
+          )}
+          <Button
+            type="submit"
+            sx={{ mt: 1 }}
+            disabled={loading}
+            onClick={
+              onboarding?.status === "Rejected" ? handleResubmit : handleSubmit
+            }
+          >
+            {loading
+              ? "Loading..."
+              : onboarding?.status === "Rejected"
+              ? "Resubmit"
+              : "Submit"}
+          </Button>
+        </>
       )}
     </form>
   );

@@ -34,6 +34,7 @@ const Panel0: React.FC<Props> = ({
           value={firstname}
           onChange={(e) => setFirstname(e.target.value)}
           disabled={readonly}
+          required
         />
       </FormControl>
 
@@ -56,6 +57,7 @@ const Panel0: React.FC<Props> = ({
           value={lastname}
           onChange={(e) => setLastname(e.target.value)}
           disabled={readonly}
+          required
         />
       </FormControl>
 

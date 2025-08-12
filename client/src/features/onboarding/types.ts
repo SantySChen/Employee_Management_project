@@ -73,3 +73,9 @@ export interface Onboarding {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface OnboardingState {
+  data: Onboarding | null;
+  loading: boolean;
+  error: string | null;
+}

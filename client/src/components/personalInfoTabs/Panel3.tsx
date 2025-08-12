@@ -26,6 +26,7 @@ const Panel3: React.FC<Props> = ({
           value={cellPhone}
           onChange={(e) => setCellPhone(e.target.value)}
           disabled={readonly}
+          required
         />
       </FormControl>
       <FormControl>

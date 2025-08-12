@@ -195,6 +195,7 @@ const hrSlice = createSlice({
       })
       .addCase(inviteEmployee.fulfilled, (state) => {
         state.loading = false;
+        state.success = true;
       })
       .addCase(inviteEmployee.rejected, (state, action) => {
         state.loading = false;

@@ -1,5 +1,12 @@
 import React from "react";
-import { TabPanel, FormControl, FormLabel, Input } from "@mui/joy";
+import {
+  TabPanel,
+  FormControl,
+  FormLabel,
+  Input,
+  Select,
+  Option,
+} from "@mui/joy";
 
 interface Props {
   building: string;
@@ -26,7 +33,7 @@ const Panel2: React.FC<Props> = ({
   setCity,
   setState,
   setZip,
-  readonly
+  readonly,
 }) => {
   return (
     <TabPanel value={2}>
@@ -36,8 +43,12 @@ const Panel2: React.FC<Props> = ({
           name="building"
           type="text"
           value={building}
-          onChange={(e) => setBuilding(e.target.value)}
+          onChange={(e) => {
+            const numericValue = e.target.value.replace(/\D/g, "");
+            setBuilding(numericValue);
+          }}
           disabled={readonly}
+          required
         />
       </FormControl>
       <FormControl required>
@@ -48,6 +59,7 @@ const Panel2: React.FC<Props> = ({
           value={street}
           onChange={(e) => setStreet(e.target.value)}
           disabled={readonly}
+          required
         />
       </FormControl>
       <FormControl required>
@@ -58,17 +70,79 @@ const Panel2: React.FC<Props> = ({
           value={city}
           onChange={(e) => setCity(e.target.value)}
           disabled={readonly}
+          required
         />
       </FormControl>
-      <FormControl required>
+      <FormControl required sx={{ minWidth: 200 }}>
         <FormLabel>State</FormLabel>
-        <Input
+        <Select
           name="state"
-          type="text"
           value={state}
-          onChange={(e) => setState(e.target.value)}
+          onChange={(e, newValue) => {
+            if (newValue) setState(newValue);
+          }}
           disabled={readonly}
-        />
+          placeholder="Select a state"
+          sx={{ width: "100%" }}
+          required
+        >
+          {[
+            "AL",
+            "AK",
+            "AZ",
+            "AR",
+            "CA",
+            "CO",
+            "CT",
+            "DE",
+            "FL",
+            "GA",
+            "HI",
+            "ID",
+            "IL",
+            "IN",
+            "IA",
+            "KS",
+            "KY",
+            "LA",
+            "ME",
+            "MD",
+            "MA",
+            "MI",
+            "MN",
+            "MS",
+            "MO",
+            "MT",
+            "NE",
+            "NV",
+            "NH",
+            "NJ",
+            "NM",
+            "NY",
+            "NC",
+            "ND",
+            "OH",
+            "OK",
+            "OR",
+            "PA",
+            "RI",
+            "SC",
+            "SD",
+            "TN",
+            "TX",
+            "UT",
+            "VT",
+            "VA",
+            "WA",
+            "WV",
+            "WI",
+            "WY",
+          ].map((abbr) => (
+            <Option key={abbr} value={abbr}>
+              {abbr}
+            </Option>
+          ))}
+        </Select>
       </FormControl>
       <FormControl required>
         <FormLabel>Zip Code</FormLabel>
@@ -78,6 +152,7 @@ const Panel2: React.FC<Props> = ({
           value={zip}
           onChange={(e) => setZip(e.target.value)}
           disabled={readonly}
+          required
         />
       </FormControl>
     </TabPanel>
